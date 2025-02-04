@@ -292,7 +292,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef HW_VENDOR
 #error HW_VENDOR must be defined
 #endif
-
 // -----------------------------------------------------------------------------
 // Global switches to turn off features for a minimized build
 // -----------------------------------------------------------------------------
