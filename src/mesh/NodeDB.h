@@ -117,6 +117,7 @@ class NodeDB
 
     /// pick a provisional nodenum we hope no one is using
     void pickNewNodeNum();
+    void setNodeNum(NodeNum n);
 
     // get channel channel index we heard a nodeNum on, defaults to 0 if not found
     uint8_t getMeshNodeChannel(NodeNum n);

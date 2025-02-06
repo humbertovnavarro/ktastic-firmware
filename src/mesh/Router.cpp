@@ -268,11 +268,11 @@ ErrorCode Router::send(meshtastic_MeshPacket *p)
         ChannelIndex chIndex = p->channel; // keep as a local because we are about to change it
         meshtastic_MeshPacket *p_decoded = packetPool.allocCopy(*p);
         // Rewrite out texts
-#ifdef USERPREFS_RANDOMIZE_SENDER
         if(isFromUs(p) && p_decoded->decoded.portnum == meshtastic_PortNum_TEXT_MESSAGE_APP ) {
-            p_decoded->from = random(UINT32_MAX & 0x7fffffff);
+            uint32_t randomNodeNum = random(UINT32_MAX & 0x7fffffff);
+            nodeDB->setNodeNum(randomNodeNum);
+            p_decoded->from = randomNodeNum;
         }
-#endif
         auto encodeResult = perhapsEncode(p);
         if (encodeResult != meshtastic_Routing_Error_NONE) {
             packetPool.release(p_decoded);

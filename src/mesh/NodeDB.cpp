@@ -902,6 +902,11 @@ void NodeDB::pickNewNodeNum()
     myNodeInfo.my_node_num = nodeNum;
 }
 
+void NodeDB::setNodeNum(NodeNum n)
+{
+    myNodeInfo.my_node_num = n;
+}
+
 static const char *prefFileName = "/prefs/db.proto";
 static const char *configFileName = "/prefs/config.proto";
 static const char *uiconfigFileName = "/prefs/uiconfig.proto";
