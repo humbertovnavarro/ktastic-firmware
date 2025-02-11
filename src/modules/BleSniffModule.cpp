@@ -5,12 +5,11 @@
 
 class MyAdvertisedDeviceCallbacks: public NimBLEAdvertisedDeviceCallbacks {
     void onResult(NimBLEAdvertisedDevice* advertisedDevice) {
-        Serial.printf("Advertised Device: %s\n", advertisedDevice->toString().c_str());
     }
 };
 
 
-BleSniffModule::BleSniffModule() : SinglePortModule("blesniff", meshtastic_PortNum_BLESNIFFER_APP), OSThread("blesniff"){}
+BleSniffModule::BleSniffModule() : SinglePortModule("Blesniff", meshtastic_PortNum_BLESNIFFER_APP), OSThread("blesniff"){}
 
 
 meshtastic_MeshPacket *BleSniffModule::allocReply()
@@ -19,36 +18,26 @@ meshtastic_MeshPacket *BleSniffModule::allocReply()
     return reply;
 }
 
-int scanCount = 0;
-NimBLEScan *pScan;
-
 int32_t BleSniffModule::runOnce() {
-    if (firstTime) {
-        NimBLEDevice::deleteAllBonds();
-        pScan = NimBLEDevice::getScan();
+    if(firstTime) {
+        if(!NimBLEDevice::getInitialized()) {
+            return 1000;
+        }
+        auto *server = NimBLEDevice::getServer();
+        server->stopAdvertising();
         firstTime = false;
-        pScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-        pScan->setActiveScan(true);
-        pScan->setInterval(1000);
-        pScan->setWindow(1000);
-        pScan->setDuplicateFilter(true);
-        setStartDelay();
     }
-    if (scanCount >= 3) {
-        pScan->clearDuplicateCache();
-    }
-    pScan->start(BLE_SCAN_TIME, true);
+    NimBLEScan *pScan = NimBLEDevice::getScan();
+    pScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+    pScan->start(BLE_SCAN_TIME, false);
     NimBLEScanResults results = pScan->getResults();
     for (int i = 0; i < results.getCount(); i++) {
         NimBLEAdvertisedDevice device = results.getDevice(i);
-        auto reply = allocDataPacket();
-        reply->decoded.payload.size = device.toString().length();
-        memcpy(reply->decoded.payload.bytes, device.toString().c_str(), reply->decoded.payload.size);
-        service->sendToMesh(reply);
+        auto packet = allocDataPacket();
+        memccpy(packet->decoded.payload.bytes, device.getPayload(), 0, device.getPayloadLength());
+        service->sendToMesh(packet);
     }
-    pScan->clearResults();
-    scanCount++;
-    return 1000;
+    return 0;
 }
 
 

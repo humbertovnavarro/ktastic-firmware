@@ -97,6 +97,9 @@
  */
 void setupModules()
 {
+#if !MESHTASTIC_EXCLUDE_BLESNIFF
+        new BleSniffModule();
+#endif
     if (config.device.role != meshtastic_Config_DeviceConfig_Role_REPEATER) {
 #if (HAS_BUTTON || ARCH_PORTDUINO) && !MESHTASTIC_EXCLUDE_INPUTBROKER
         inputBroker = new InputBroker();
@@ -218,9 +221,6 @@ void setupModules()
 #if defined(USE_SX1280) && !MESHTASTIC_EXCLUDE_AUDIO
         audioModule = new AudioModule();
 #endif
-#if !MESHTASTIC_EXCLUDE_PAXCOUNTER
-        paxcounterModule = new PaxcounterModule();
-#endif
 #endif
 #if defined(ARCH_ESP32) || defined(ARCH_PORTDUINO)
 #if !MESHTASTIC_EXCLUDE_STOREFORWARD
@@ -248,8 +248,5 @@ void setupModules()
     }
     // NOTE! This module must be added LAST because it likes to check for replies from other modules and avoid sending extra
     // acks
-#if !MESHTASTIC_EXCLUDE_BLESNIFF
-        new BleSniffModule();
-#endif
     routingModule = new RoutingModule();
 }
