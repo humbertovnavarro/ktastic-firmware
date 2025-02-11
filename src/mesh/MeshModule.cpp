@@ -45,6 +45,10 @@ int32_t MeshModule::setStartDelay()
     return startDelay;
 }
 
+int32_t MeshModule::getStartDelay() {
+    return MESHMODULE_MIN_BROADCAST_DELAY_MS + numPeriodicModules * MESHMODULE_BROADCAST_SPACING_MS;
+}
+
 meshtastic_MeshPacket *MeshModule::allocAckNak(meshtastic_Routing_Error err, NodeNum to, PacketId idFrom, ChannelIndex chIndex,
                                                uint8_t hopLimit)
 {

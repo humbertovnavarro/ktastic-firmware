@@ -127,6 +127,7 @@ class MeshModule
 
     // Set the start delay for module that broadcasts periodically
     int32_t setStartDelay();
+    int32_t getStartDelay();
 
     /**
      * If your handler wants to send a response, simply set currentReply and it will be sent at the end of response handling.

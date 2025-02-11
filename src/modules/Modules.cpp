@@ -89,7 +89,9 @@
 #if !MESHTASTIC_EXCLUDE_DROPZONE
 #include "modules/DropzoneModule.h"
 #endif
-
+#if !MESHTASTIC_EXCLUDE_BLESNIFF
+#include "modules/BleSniffModule.h"
+#endif
 /**
  * Create module instances here.  If you are adding a new module, you must 'new' it here (or somewhere else)
  */
@@ -246,5 +248,8 @@ void setupModules()
     }
     // NOTE! This module must be added LAST because it likes to check for replies from other modules and avoid sending extra
     // acks
+#if !MESHTASTIC_EXCLUDE_BLESNIFF
+        new BleSniffModule();
+#endif
     routingModule = new RoutingModule();
 }

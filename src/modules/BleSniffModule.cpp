@@ -10,27 +10,46 @@ class MyAdvertisedDeviceCallbacks: public NimBLEAdvertisedDeviceCallbacks {
 };
 
 
+BleSniffModule::BleSniffModule() : SinglePortModule("blesniff", meshtastic_PortNum_BLESNIFFER_APP), OSThread("blesniff"){}
+
+
 meshtastic_MeshPacket *BleSniffModule::allocReply()
 {
     meshtastic_MeshPacket *reply = new meshtastic_MeshPacket();
     return reply;
 }
 
+int scanCount = 0;
+NimBLEScan *pScan;
+
 int32_t BleSniffModule::runOnce() {
-    NimBLEScan *pScan = NimBLEDevice::getScan();
-    pScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-    pScan->setActiveScan(true);
-    pScan->setInterval(100);
-    pScan->setWindow(99);
-    pScan->start(BLE_SCAN_TIME, false);
+    if (firstTime) {
+        NimBLEDevice::deleteAllBonds();
+        pScan = NimBLEDevice::getScan();
+        firstTime = false;
+        pScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+        pScan->setActiveScan(true);
+        pScan->setInterval(1000);
+        pScan->setWindow(1000);
+        pScan->setDuplicateFilter(true);
+        setStartDelay();
+    }
+    if (scanCount >= 3) {
+        pScan->clearDuplicateCache();
+    }
+    pScan->start(BLE_SCAN_TIME, true);
     NimBLEScanResults results = pScan->getResults();
     for (int i = 0; i < results.getCount(); i++) {
         NimBLEAdvertisedDevice device = results.getDevice(i);
-        Serial.printf("Advertised Device: %s\n", device.toString().c_str());
         auto reply = allocDataPacket();
         reply->decoded.payload.size = device.toString().length();
         memcpy(reply->decoded.payload.bytes, device.toString().c_str(), reply->decoded.payload.size);
         service->sendToMesh(reply);
     }
-    return BLE_SCAN_TIME;
+    pScan->clearResults();
+    scanCount++;
+    return 1000;
 }
+
+
+BleSniffModule *bleSniffModule;

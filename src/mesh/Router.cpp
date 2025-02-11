@@ -11,7 +11,6 @@
 #include "mesh-pb-constants.h"
 #include "meshUtils.h"
 #include "modules/RoutingModule.h"
-#include "sodium.h"
 #if !MESHTASTIC_EXCLUDE_MQTT
 #include "mqtt/MQTT.h"
 #endif
@@ -267,12 +266,6 @@ ErrorCode Router::send(meshtastic_MeshPacket *p)
     if (p->which_payload_variant == meshtastic_MeshPacket_decoded_tag) {
         ChannelIndex chIndex = p->channel; // keep as a local because we are about to change it
         meshtastic_MeshPacket *p_decoded = packetPool.allocCopy(*p);
-        // Rewrite out texts
-        if(isFromUs(p) && p_decoded->decoded.portnum == meshtastic_PortNum_TEXT_MESSAGE_APP ) {
-            uint32_t randomNodeNum = random(UINT32_MAX & 0x7fffffff);
-            nodeDB->setNodeNum(randomNodeNum);
-            p_decoded->from = randomNodeNum;
-        }
         auto encodeResult = perhapsEncode(p);
         if (encodeResult != meshtastic_Routing_Error_NONE) {
             packetPool.release(p_decoded);
